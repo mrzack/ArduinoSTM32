@@ -76,6 +76,13 @@ void TwoWire::i2c_stop() {
     set_sda(HIGH);
 }
 
+void TwoWire::i2c_rsc() {	//20160427 added the function of Repeated Start Condition
+    set_scl(LOW);
+    set_sda(HIGH);		
+    set_scl(HIGH);
+    set_sda(LOW);
+}
+
 bool TwoWire::i2c_get_ack() {
     set_scl(LOW);
     set_sda(HIGH);
@@ -121,21 +128,22 @@ void TwoWire::i2c_shift_out(uint8 val) {
     }
 }
 
-uint8 TwoWire::process() {
+uint8 TwoWire::process(bool nrsc) {
     itc_msg.xferred = 0;
 
     uint8 sla_addr = (itc_msg.addr << 1);
     if (itc_msg.flags == I2C_MSG_READ) {
         sla_addr |= I2C_READ;
     }
-    i2c_start();
-    // shift out the address we're transmitting to
-    i2c_shift_out(sla_addr);
-    if (!i2c_get_ack()) 
-	{
+	if(!(itc_msg.flags == I2C_MSG_READ && nrsc == false )){	// 20160427 added to skip i2c_start() when it will be left in a Repeated Start Condition
+	    i2c_start();
+	}
+	// shift out the address we're transmitting to
+	i2c_shift_out(sla_addr);
+	if (!i2c_get_ack()) {
 		i2c_stop();// Roger Clark. 20141110 added to set clock high again, as it will be left in a low state otherwise
-        return ENACKADDR;
-    }
+	    return ENACKADDR;
+	}
     // Recieving
     if (itc_msg.flags == I2C_MSG_READ) {
         while (itc_msg.xferred < itc_msg.length) {
@@ -149,6 +157,7 @@ uint8 TwoWire::process() {
                 i2c_send_nack();
             }
         }
+    	i2c_stop();
     }
     // Sending
     else {
@@ -161,8 +170,14 @@ uint8 TwoWire::process() {
             }
             itc_msg.xferred++;
         }
+    	if( nrsc == false ){	// 20160427 added to set i2c_rsc() when it will be left in a Repeated Start Condition
+    		i2c_rsc();
+    	}
+    	else {
+    		i2c_stop();
+		}
     }
-    i2c_stop();
+//    i2c_stop();	//20160427
     return SUCCESS;
 }
 
@@ -190,5 +205,5 @@ TwoWire::~TwoWire() {
 }
 
 // Declare the instance that the users of the library can use
-//TwoWire Wire(SCL, SDA, SOFT_STANDARD);
-TwoWire Wire(PB6, PB7, SOFT_STANDARD);
+TwoWire Wire(SCL, SDA, SOFT_STANDARD);	//2016.4.5 changed
+//TwoWire Wire(PB6, PB7, SOFT_STANDARD);

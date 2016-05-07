@@ -65,7 +65,7 @@ protected:
     boolean tx_buf_overflow;
 
     // Force derived classes to define process function
-    virtual uint8 process() = 0;
+    virtual uint8 process(bool) = 0;
 public:
     WireBase() {}
     ~WireBase() {}
@@ -91,6 +91,7 @@ public:
      * buffer has not overflowed.
      */
     uint8 endTransmission(void);
+    uint8 endTransmission(bool);	//20160427 added to set a Repeated States
 
     /*
      * Request bytes from a slave device and process the request,

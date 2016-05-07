@@ -53,6 +53,8 @@ protected:
      * hardware. If an error occured, restart the I2C device.
      */
     uint8 process();
+    uint8 process(bool);  //20160423
+
 public:
     /*
      * Check if devsel is within range and enable selected I2C interface with
