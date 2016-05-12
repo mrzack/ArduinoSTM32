@@ -52,7 +52,7 @@ protected:
      * Processes the incoming I2C message defined by WireBase to the
      * hardware. If an error occured, restart the I2C device.
      */
-    uint8 process();
+//    uint8 process(); //20160512 removed to fix compile errors
     uint8 process(bool);  //20160423
 
 public:

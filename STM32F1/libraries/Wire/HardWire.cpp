@@ -38,7 +38,11 @@
 
 #include "HardWire.h"
 
-uint8 HardWire::process() {
+#include "i2c_private.h"
+
+
+//uint8 HardWire::process() {
+uint8 HardWire::process(bool nrsc) {	//20160512 added the nrsc to fix compile errors
     int8 res = i2c_master_xfer(sel_hard, &itc_msg, 1, 0);
     if (res == I2C_ERROR_PROTOCOL) {
         if (sel_hard->error_flags & I2C_SR1_AF) { /* NACK */
